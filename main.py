@@ -6,11 +6,16 @@ from nltk.tokenize import sent_tokenize, word_tokenize
 from nltk.probability import FreqDist
 # nltk.download('stopwords')
 from nltk.corpus import stopwords
+from nltk.stem import SnowballStemmer
 
+# Translation
 translator = 'bing'
 translate_to_lang = 'en'
 client = Client('fr', translate_to_lang)
+
+# NLTK
 stopwords = set(stopwords.words('french'))
+stemmer = SnowballStemmer('french')
 
 # SAMPLE TEXTS FROM LAWLESS FRENCH https://www.lawlessfrench.com
 # sample_texts/art_de_la_traduction.txt
@@ -30,7 +35,7 @@ def print_freq_details(fdist, sent):
     print(sent)
     for word in set(word_tokenize(sent)):
         if fdist[word] > 0:
-            print(word, ':', fdist[word])
+            print(word, 'STEMMED', stemmer.stem(word), 'FREQUENCY:', fdist[word])
     print('=========\n')
 
 def main_prog(filename):
