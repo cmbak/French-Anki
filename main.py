@@ -7,6 +7,7 @@ from nltk.probability import FreqDist
 # nltk.download('stopwords')
 from nltk.corpus import stopwords
 from nltk.stem import SnowballStemmer
+import spacy
 
 # Translation
 translator = 'bing'
@@ -16,6 +17,10 @@ client = Client('fr', translate_to_lang)
 # NLTK
 stopwords = set(stopwords.words('french'))
 stemmer = SnowballStemmer('french')
+
+# spacy
+# py -m spacy download fr_core_news_sm (more eff than dep_news_trf)
+nlp = spacy.load('fr_core_news_sm')
 
 # SAMPLE TEXTS FROM LAWLESS FRENCH https://www.lawlessfrench.com
 # sample_texts/art_de_la_traduction.txt
@@ -33,9 +38,10 @@ def validate_file_format(file_path):
 # Prints frequency of (non stopwords) words in a sentence
 def print_freq_details(fdist, sent):
     print(sent)
-    for word in set(word_tokenize(sent)):
-        if fdist[word] > 0:
-            print(word, 'STEMMED', stemmer.stem(word), 'FREQUENCY:', fdist[word])
+    # for word in set(word_tokenize(sent)):
+    for word in nlp(sent):
+        if fdist[word.text] > 0:
+            print(word.text, 'LEMMATIZED', word.lemma_, 'FREQUENCY:', fdist[word.text])
     print('=========\n')
 
 def main_prog(filename):
@@ -56,6 +62,10 @@ def main_prog(filename):
 
             for sent in sentences:
                 print_freq_details(fdist, sent)
+            # text = "J'ai mangé des pommes hier"
+            # tokens = nlp(text)
+            # for token in tokens:
+            #     print(token.lemma_)
 
     except Exception as e:
         print(str(e))
