@@ -9,5 +9,14 @@ parser = argparse.ArgumentParser(description='Convert a piece of French text int
 parser.add_argument('filename', nargs=1, help='name of the file to create Anki cards from') # TODO Add multiple file implementation later
 args = parser.parse_args()
 
-french_file = args.filename
-print(type(french_file))
+file = ""
+
+# Need to ensure that file is txt file!
+try:
+    with open(args.filename[0], encoding="utf-8") as f: # Will only get 1 file
+        file = f.read()
+except Exception as e:
+    print(str(e))
+    # TODO quit/throw error instead of printing?
+
+print(file)
