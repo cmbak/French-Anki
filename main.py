@@ -1,7 +1,11 @@
 import argparse
 import translators as ts
+from reverso_context_api import Client
 import nltk
 from nltk.tokenize import sent_tokenize
+
+translate_to_lang = 'en'
+client = Client('fr', translate_to_lang)
 
 # SAMPLE TEXTS FROM LAWLESS FRENCH https://www.lawlessfrench.com
 
@@ -9,7 +13,7 @@ parser = argparse.ArgumentParser(description='Convert a piece of French text (ut
 parser.add_argument('filename', nargs=1, help='name of the file to create Anki cards from') # TODO Add multiple file implementation later
 args = parser.parse_args()
 
-translate_to_lang = 'en'
+
 
 def validate_file_format(file_path):
     split_file_path = file_path.split('.')
@@ -26,8 +30,7 @@ def main_prog(filename):
 
             sentences = sent_tokenize(file, language='french')
             for s in sentences:
-                print(s, "\nTRANSLATION\n", ts.translate_text(s, translator='bing', from_language='fr', to_language=translate_to_lang), "\n===============\n")
-            
+                print(s, "\nTRANSLATION\n", ts.translate_text(s, translator='bing', from_language='fr', to_language=translate_to_lang), "\n===============\n")            
 
     except Exception as e:
         print(str(e))
