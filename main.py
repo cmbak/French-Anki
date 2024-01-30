@@ -55,22 +55,12 @@ def main_prog(filename):
     try:
         with open(filename, encoding="utf-8") as f: # Will only get 1 file
             file = f.read()
-
             sentences = sent_tokenize(file, language='french')
             words = [word.lower() for word in word_tokenize(file) if word.isalpha() and word not in stopwords]
-
-            # for s in sentences:
-                # print(s, "\nTRANSLATION\n", ts.translate_text(s, translator=translator, from_language='fr', to_language=translate_to_lang), "\n===============\n")            
-            # fdist = FreqDist(word.lower() for word in word_tokenize(file))
-
             fdist = FreqDist(words)
-
+            
             for sent in sentences:
                 print_freq_details(fdist, sent)
-            # text = "J'ai mangé des pommes hier"
-            # tokens = nlp(text)
-            # for token in tokens:
-            #     print(token.lemma_)
 
     except Exception as e:
         print(str(e))
