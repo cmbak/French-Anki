@@ -1,7 +1,6 @@
 import argparse
 import translators as ts
 from reverso_context_api import Client
-import nltk
 from nltk.tokenize import sent_tokenize, word_tokenize
 from nltk.probability import FreqDist
 # nltk.download('stopwords')
@@ -35,18 +34,24 @@ def validate_file_format(file_path):
         return False
     return True
 
+def translate_word(word):
+    return ts.translate_text(word, translator=translator, from_language='fr', to_language=translate_to_lang)
+    # 429 Error w/ Reverso - try word limit?
+    # translations = list(client.get_translations(word))
+    # if len(translations) < 3:
+    #     return translations
+    # return translations[:3]
+
 # Prints frequency of (non stopwords) words in a sentence
 def print_freq_details(fdist, sent):
     print(sent)
-    # for word in set(word_tokenize(sent)):
     for word in nlp(sent):
         if fdist[word.text] > 0:
             print(word.text, 'LEMMATIZED', word.lemma_, 'FREQUENCY:', fdist[word.text])
+            print(translate_word(word.lemma_), '\n')
     print('=========\n')
 
 def main_prog(filename):
-    file = ""
-
     try:
         with open(filename, encoding="utf-8") as f: # Will only get 1 file
             file = f.read()
@@ -75,6 +80,3 @@ if validate_file_format(args.filename[0]):
     main_prog(args.filename[0])
 else:
     print("Please enter a valid file format (.txt)")
-
-
-# Need to ensure that file is txt file!
