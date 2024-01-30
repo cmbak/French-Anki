@@ -14,6 +14,7 @@ translate_to_lang = 'en'
 client = Client('fr', translate_to_lang)
 
 # NLTK
+# NOTE - NLTK only has french tagger - could try changing to using spacy only
 stopwords = set(stopwords.words('french'))
 stemmer = SnowballStemmer('french')
 
@@ -47,14 +48,14 @@ def print_freq_details(fdist, sent):
     print(sent)
     for word in nlp(sent):
         if fdist[word.text] > 0:
-            print(word.text, 'LEMMATIZED', word.lemma_, 'FREQUENCY:', fdist[word.text])
+            print(word.text, 'LEMMATIZED', word.lemma_, 'TAGGED', word.tag_, 'FREQUENCY:', fdist[word.text])
             print(translate_word(word.lemma_), '\n')
     print('=========\n')
 
 def main_prog(filename):
     try:
         with open(filename, encoding="utf-8") as f: # Will only get 1 file
-            file = f.read()
+            file = f.read() 
             sentences = sent_tokenize(file, language='french')
             words = [word.lower() for word in word_tokenize(file) if word.isalpha() and word not in stopwords]
             fdist = FreqDist(words)
