@@ -7,6 +7,7 @@ from nltk.probability import FreqDist
 from nltk.corpus import stopwords
 from nltk.stem import SnowballStemmer
 import spacy
+import genanki
 
 # Translation
 translator = 'bing'
@@ -43,14 +44,69 @@ def translate_word(word):
     #     return translations
     # return translations[:3]
 
+
+anki_note_model = genanki.Model(
+    12321321318,
+    'PY Sentence Mining Model',
+    fields=[
+        {'name': 'Word'},
+        {'name': 'Sentence'},
+        {'name': 'Translation'},
+        {'name': 'Tag'},
+    ],
+    templates=[
+        {
+            'name': 'Card WAAWA',
+            'qfmt': '<div id="french-word"><b>{{Word}}</b></div><div id="sentence"><br />{{Sentence}}</div>',
+            'afmt': '{{FrontSide}}<hr id="answer"><em id="tag">{{Tag}}</em> <b>{{Translation}}<b>'
+        }
+    ],
+    css='''
+        .card {
+            padding: 1.5rem;
+            font-size: 2.5rem;
+            font-family: Arial;
+            text-align: center;
+        }
+
+        #answer {
+            margin: 1rem auto;
+        }
+
+        #sentence {
+            margin-bottom: 2.5rem;
+        }
+
+        #tag {
+            color:gray;
+            font-size: 1.4rem;
+            margin-right: 0.8rem;
+        }
+        '''
+)
+
+# doc_word is the result of calling nlp on the sentence
+def create_anki_card(doc_word, sentence):
+    note = genanki.Note(model=anki_note_model, fields=[])
+
 # Prints frequency of (non stopwords) words in a sentence
 def print_freq_details(fdist, sent):
     print(sent)
     for word in nlp(sent):
         if fdist[word.text] > 0:
-            print(word.text, 'LEMMATIZED', word.lemma_, 'TAGGED', word.tag_, 'FREQUENCY:', fdist[word.text])
-            print(translate_word(word.lemma_), '\n')
+            # print(word.text, 'LEMMATIZED', word.lemma_, 'TAGGED', word.tag_, 'FREQUENCY:', fdist[word.text])
+            # print(translate_word(word.lemma_), '\n')
+            create_anki_card(word, sent)
     print('=========\n')
+
+def test(fdist, sent):
+    deck_id = 2059400110
+    deck = genanki.Deck(deck_id, 'TEST PY')
+
+    for word in nlp(sent):
+        note = genanki.Note(model=anki_note_model, fields=[word.text, sent, translate_word(word.lemma_), word.tag_])
+        deck.add_note(note)
+    genanki.Package(deck).write_to_file('testpy.apkg')
 
 def main_prog(filename):
     try:
@@ -60,11 +116,13 @@ def main_prog(filename):
             words = [word.lower() for word in word_tokenize(file) if word.isalpha() and word not in stopwords]
             fdist = FreqDist(words)
             
-            for sent in sentences:
-                print_freq_details(fdist, sent)
+            # for sent in sentences:
+                # print_freq_details(fdist, sent)
+            
+            test(fdist, sentences[2])
 
     except Exception as e:
-        print(str(e))
+        print('Sorry, something went wrong:', str(e))
         # TODO quit/throw error instead of printing?
 
 if validate_file_format(args.filename[0]):
