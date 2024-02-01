@@ -5,7 +5,6 @@ from nltk.tokenize import sent_tokenize, word_tokenize
 from nltk.probability import FreqDist
 # nltk.download('stopwords')
 from nltk.corpus import stopwords
-from nltk.stem import SnowballStemmer
 import spacy
 import genanki
 
@@ -17,7 +16,6 @@ client = Client('fr', translate_to_lang)
 # NLTK
 # NOTE - NLTK only has french tagger - could try changing to using spacy only
 stopwords = set(stopwords.words('french'))
-stemmer = SnowballStemmer('french')
 
 # spacy
 # py -m spacy download fr_core_news_sm (more eff than dep_news_trf)
