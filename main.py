@@ -46,7 +46,7 @@ def translate_word(word):
 
 
 anki_note_model = genanki.Model(
-    12321321318,
+    1770821663,
     'PY Sentence Mining Model',
     fields=[
         {'name': 'Word'},
@@ -108,7 +108,7 @@ def get_word_token_gender(word):
     return ''
 
 def test(fdist, sent):
-    deck_id = 2059400110
+    deck_id = 1479086433
     deck = genanki.Deck(deck_id, 'TEST PY')
     doc = [word for word in nlp(sent) if word.text.isalpha()]
 
