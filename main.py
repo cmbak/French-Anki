@@ -53,18 +53,19 @@ anki_note_model = genanki.Model(
         {'name': 'Sentence'},
         {'name': 'Translation'},
         {'name': 'Tag'},
+        {'name': 'Gender'}
     ],
     templates=[
         {
             'name': 'Card WAAWA',
             'qfmt': '<div id="french-word"><b>{{Word}}</b></div><div id="sentence"><br />{{Sentence}}</div>',
-            'afmt': '{{FrontSide}}<hr id="answer"><em id="tag">{{Tag}}</em> <b>{{Translation}}<b>'
+            'afmt': '{{FrontSide}}<hr id="answer"><em id="tag">{{Tag}}</em> <b>{{Translation}}{{Gender}}<b>'
         }
     ],
     css='''
         .card {
             padding: 1.5rem;
-            font-size: 2.5rem;
+            font-size: 2.2rem;
             font-family: Arial;
             text-align: center;
         }
@@ -79,7 +80,7 @@ anki_note_model = genanki.Model(
 
         #tag {
             color:gray;
-            font-size: 1.4rem;
+            font-size: 1.1rem;
             margin-right: 0.8rem;
         }
         '''
@@ -99,27 +100,42 @@ def print_freq_details(fdist, sent):
             create_anki_card(word, sent)
     print('=========\n')
 
+# word is of type Token (from spacy)
+def get_word_token_gender(word):
+    gender = word.morph.get('Gender') # E.g. Returns ['Male']
+    if len(gender) != 0:
+        return gender[0]
+    return ''
+
 def test(fdist, sent):
     deck_id = 2059400110
     deck = genanki.Deck(deck_id, 'TEST PY')
+    doc = [word for word in nlp(sent) if word.text.isalpha()]
 
-    for word in nlp(sent):
-        note = genanki.Note(model=anki_note_model, fields=[word.text, sent, translate_word(word.lemma_), word.tag_])
+    for word in doc:
+        # TODO ENSURE ALPHANUMERIC
+        # TODO Conditional formatting in python?
+        gender = get_word_token_gender(word)
+
+        note = genanki.Note(model=anki_note_model, fields=[word.text, sent, translate_word(word.lemma_), word.tag_, gender])
         deck.add_note(note)
     genanki.Package(deck).write_to_file('testpy.apkg')
 
 def main_prog(filename):
     try:
+        file = ""
         with open(filename, encoding="utf-8") as f: # Will only get 1 file
             file = f.read() 
-            sentences = sent_tokenize(file, language='french')
-            words = [word.lower() for word in word_tokenize(file) if word.isalpha() and word not in stopwords]
-            fdist = FreqDist(words)
+        sentences = sent_tokenize(file, language='french')
+        words = [word.lower() for word in word_tokenize(file) if word.isalpha() and word not in stopwords]
+        fdist = FreqDist(words)
             
-            # for sent in sentences:
-                # print_freq_details(fdist, sent)
+        # for sent in sentences:
+            # print_freq_details(fdist, sent)
             
-            test(fdist, sentences[2])
+        # need to ensure SET of words
+
+        test(fdist, sentences[2])
 
     except Exception as e:
         print('Sorry, something went wrong:', str(e))
@@ -127,5 +143,6 @@ def main_prog(filename):
 
 if validate_file_format(args.filename[0]):
     main_prog(args.filename[0])
+    # FIXME is this slow?
 else:
     print("Please enter a valid file format (.txt)")
