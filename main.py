@@ -55,9 +55,9 @@ anki_note_model = genanki.Model(
     ],
     templates=[
         {
-            'name': 'Card WAAWA',
+            'name': 'Card PY GEN',
             'qfmt': '<div id="french-word"><b>{{Word}}</b></div><div id="sentence"><br />{{Sentence}}</div>',
-            'afmt': '{{FrontSide}}<hr id="answer"><em id="tag">{{Tag}}</em> <b>{{Translation}}{{Gender}}<b>'
+            'afmt': '{{FrontSide}}<hr id="answer"><em id="tag">{{Tag}}</em> <b>{{Translation}}<b><div id="gender">{{Gender}}</div>'
         }
     ],
     css='''
@@ -80,6 +80,10 @@ anki_note_model = genanki.Model(
             color:gray;
             font-size: 1.1rem;
             margin-right: 0.8rem;
+        }
+        
+        #gender {
+            font-weight: normal;
         }
         '''
 )
