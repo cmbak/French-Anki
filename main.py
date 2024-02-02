@@ -122,7 +122,7 @@ def get_word_token_gender(word):
 
 def test(fdist, sent):
     deck_id = 1479086433
-    deck = genanki.Deck(deck_id, 'TEST PY')
+    deck = genanki.Deck(deck_id, 'ANKI LANGUAGE PY')
     doc = [word for word in nlp(sent) if word.text.isalpha()]
 
     heap = []
@@ -134,16 +134,13 @@ def test(fdist, sent):
         note = SortableNote(anki_note_model, [word.text, sent, translate_word(word.lemma_), word.tag_, gender], fdist[word.text])
         note.priority *= -1 # Python has no max heap!
         heapq.heappush(heap, note)
-        # deck.add_note(note)
 
     # add heap to deck
-    # while len(heap) > 0:
-    #     note = heapq.heappop(heap)
-    #     print("NEW TOP", heap[0][1], "CHILD", heap[2][1], "OTHER CHILD", heap[3][1])
-    #     deck.add_note(note)
+    while len(heap) > 0:
+        note = heapq.heappop(heap)
+        deck.add_note(note)
 
-
-    # genanki.Package(deck).write_to_file('testpy.apkg')
+    genanki.Package(deck).write_to_file('testpy.apkg')
 
 def main_prog(filename):
     try:
@@ -158,7 +155,6 @@ def main_prog(filename):
             # print_freq_details(fdist, sent)
             
         # need to ensure SET of words
-
         test(fdist, sentences[2])
 
     except Exception as e:
