@@ -9,6 +9,8 @@ from nltk.corpus import stopwords
 import spacy
 import genanki
 
+from SortableNote import SortableNote
+
 # Translation
 translator = 'google'
 translate_to_lang = 'en'
@@ -124,41 +126,22 @@ def test(fdist, sent):
     doc = [word for word in nlp(sent) if word.text.isalpha()]
 
     heap = []
-    arrraay = []
 
     for word in doc:
         # TODO ENSURE ALPHANUMERIC
         # TODO Conditional formatting in python?
         gender = get_word_token_gender(word)
-
-        note = genanki.Note(model=anki_note_model, fields=[word.text, sent, translate_word(word.lemma_), word.tag_, gender])
-        note_tuple = (fdist[word.text] * -1, word.text, note) # priority, word, Note
-        # heapq.heappush(heap, note_tuple) # because python has no max heap
-        arrraay.append(note_tuple)
-        print(note_tuple[0], note_tuple[1])
-        # TODO create separate class for this?
+        note = SortableNote(anki_note_model, [word.text, sent, translate_word(word.lemma_), word.tag_, gender], fdist[word.text])
+        note.priority *= -1 # Python has no max heap!
+        heapq.heappush(heap, note)
         # deck.add_note(note)
 
     # add heap to deck
     # while len(heap) > 0:
-    #     print("HEAP LENGTH", len(heap), heap[0][1])
     #     note = heapq.heappop(heap)
     #     print("NEW TOP", heap[0][1], "CHILD", heap[2][1], "OTHER CHILD", heap[3][1])
     #     deck.add_note(note)
 
-    # for i in range(len(arrraay)):
-    #     for j in range(i+1, len(arrraay)):
-    #         print(arrraay[i][:2], arrraay[j][:2], "EQUALS", arrraay[i] == arrraay[j])
-
-    for n in arrraay:
-        print(n[:2])
-    arrraay.sort()
-
-    for n in arrraay:
-        print(n[:2])
-
-    # for n in arrraay:
-    #     print(n[0], n[1])
 
     # genanki.Package(deck).write_to_file('testpy.apkg')
 

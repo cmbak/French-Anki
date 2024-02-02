@@ -2,7 +2,7 @@ from genanki import Note
 
 class SortableNote(Note):
     def __init__(self, model, fields, priority):
-        super().__init__(model, fields)
+        super().__init__(model=model, fields=fields)
         self.priority = priority
 
     def __eq__(self, other):
