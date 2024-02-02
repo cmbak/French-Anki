@@ -141,7 +141,7 @@ def main_prog(filename):
             file = f.read() 
         
         sentences = sent_tokenize(file, language='french')
-        words = [word.lower() for word in word_tokenize(file) if word.isalpha() and word not in stopwords and len(word)>1]
+        words = [word.lower() for word in word_tokenize(file) if word.isalpha() and word.lower() not in stopwords and len(word)>1]
         fdist = FreqDist(words)
         words = set(words)
         heap = []
