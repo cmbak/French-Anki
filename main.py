@@ -52,6 +52,7 @@ def translate_word(word):
     # return translations[:3]
 
 
+# TODO Conditional formatting?
 anki_note_model = genanki.Model(
     1770821663,
     'PY Sentence Mining Model',
@@ -97,19 +98,21 @@ anki_note_model = genanki.Model(
         '''
 )
 
-# doc_word is the result of calling nlp on the sentence
-def create_anki_card(doc_word, sentence):
-    note = genanki.Note(model=anki_note_model, fields=[])
+# creates anki notes from a sentence
+# adds the note to a HEAP so that the deck will be (initially) in priority order (more frequent words first)
+def create_anki_note(sentence, fdist, heap):
+    doc = [word for word in nlp(sentence) if word.text.isalpha()]
 
-# Prints frequency of (non stopwords) words in a sentence
-def print_freq_details(fdist, sent):
-    print(sent)
-    for word in nlp(sent):
-        if fdist[word.text] > 0:
-            # print(word.text, 'LEMMATIZED', word.lemma_, 'TAGGED', word.tag_, 'FREQUENCY:', fdist[word.text])
-            # print(translate_word(word.lemma_), '\n')
-            create_anki_card(word, sent)
-    print('=========\n')
+    for word in doc:
+        gender = get_word_token_gender(word)
+        note = SortableNote(anki_note_model, [word.text, sentence, translate_word(word.lemma_), word.tag_, gender], fdist[word.text])
+        note.priority *= -1 # Python has no max heap!
+        heapq.heappush(heap, note)
+
+def add_heap_to_deck(heap, deck):
+    while len(heap) > 0:
+        note = heapq.heappop(heap)
+        deck.add_note(note)
 
 # word is of type Token (from spacy)
 def get_word_token_gender(word):
@@ -118,51 +121,37 @@ def get_word_token_gender(word):
         return gender[0]
     return ''
 
-# use a max heap :)
-
-def test(fdist, sent):
-    deck_id = 1479086433
-    deck = genanki.Deck(deck_id, 'ANKI LANGUAGE PY')
-    doc = [word for word in nlp(sent) if word.text.isalpha()]
-
-    heap = []
-
-    for word in doc:
-        # TODO ENSURE ALPHANUMERIC
-        # TODO Conditional formatting in python?
-        gender = get_word_token_gender(word)
-        note = SortableNote(anki_note_model, [word.text, sent, translate_word(word.lemma_), word.tag_, gender], fdist[word.text])
-        note.priority *= -1 # Python has no max heap!
-        heapq.heappush(heap, note)
-
-    # add heap to deck
-    while len(heap) > 0:
-        note = heapq.heappop(heap)
-        deck.add_note(note)
-
+def create_deck_from_heap(heap):
+    DECK_ID = 1479086433
+    deck = genanki.Deck(DECK_ID, 'ANKI LANGUAGE PY')
+    add_heap_to_deck(heap, deck)
     genanki.Package(deck).write_to_file('testpy.apkg')
 
 def main_prog(filename):
+    print(f'{filename} has been found...')
     try:
         file = ""
+        
         with open(filename, encoding="utf-8") as f: # Will only get 1 file
             file = f.read() 
+        
         sentences = sent_tokenize(file, language='french')
         words = [word.lower() for word in word_tokenize(file) if word.isalpha() and word not in stopwords]
         fdist = FreqDist(words)
+        heap = []
             
-        # for sent in sentences:
-            # print_freq_details(fdist, sent)
-            
-        # need to ensure SET of words
-        test(fdist, sentences[2])
+        for sent in sentences:
+            create_anki_note(sent, fdist, heap)
+        
+        create_deck_from_heap(heap)
+
+        print("Deck created successfully!")
+        # TODO need to ensure SET of words
 
     except Exception as e:
         print('Sorry, something went wrong:', str(e))
-        # TODO quit/throw error instead of printing?
 
 if validate_file_format(args.filename[0]):
     main_prog(args.filename[0])
-    # FIXME is this slow?
 else:
     print("Please enter a valid file format (.txt)")
