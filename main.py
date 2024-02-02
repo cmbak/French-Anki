@@ -37,6 +37,10 @@ gender_colour_map = {
     'Fem' : '#ff8080'
 }
 
+# For now, only one sentence example sentence is used if a word appears multiple times in the text
+# This will be the first sentence that the word appears in
+# word_in_deck = dict
+
 def validate_file_format(file_path):
     split_file_path = file_path.split('.')
     if len(split_file_path) != 2 or split_file_path[1] != 'txt':
@@ -136,14 +140,16 @@ def main_prog(filename):
             file = f.read() 
         
         sentences = sent_tokenize(file, language='french')
-        words = [word.lower() for word in word_tokenize(file) if word.isalpha() and word not in stopwords]
+        words = [word.lower() for word in word_tokenize(file) if word.isalpha() and word not in stopwords and len(word)>1]
         fdist = FreqDist(words)
+        words = set(words)
+        # Is it faster to create a set after or to use a dictionary to count instances
         heap = []
             
-        for sent in sentences:
-            create_anki_note(sent, fdist, heap)
+        # for sent in sentences:
+        #     create_anki_note(sent, fdist, heap)
         
-        create_deck_from_heap(heap)
+        # create_deck_from_heap(heap)
 
         print("Deck created successfully!")
         # TODO need to ensure SET of words
