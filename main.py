@@ -1,4 +1,5 @@
 import argparse
+import heapq
 import translators as ts
 from reverso_context_api import Client
 from nltk.tokenize import sent_tokenize, word_tokenize
@@ -9,7 +10,7 @@ import spacy
 import genanki
 
 # Translation
-translator = 'bing'
+translator = 'google'
 translate_to_lang = 'en'
 client = Client('fr', translate_to_lang)
 
@@ -27,6 +28,12 @@ nlp = spacy.load('fr_core_news_sm')
 parser = argparse.ArgumentParser(description='Convert a piece of French text (utf-8) into Anki cards')
 parser.add_argument('filename', nargs=1, help='name of the file to create Anki cards from') # TODO Add multiple file implementation later
 args = parser.parse_args()
+
+# For anki styling
+gender_colour_map = {
+    'Masc' : '#80aaff',
+    'Fem' : '#ff8080'
+}
 
 def validate_file_format(file_path):
     split_file_path = file_path.split('.')
@@ -109,10 +116,15 @@ def get_word_token_gender(word):
         return gender[0]
     return ''
 
+# use a max heap :)
+
 def test(fdist, sent):
     deck_id = 1479086433
     deck = genanki.Deck(deck_id, 'TEST PY')
     doc = [word for word in nlp(sent) if word.text.isalpha()]
+
+    heap = []
+    arrraay = []
 
     for word in doc:
         # TODO ENSURE ALPHANUMERIC
@@ -120,8 +132,35 @@ def test(fdist, sent):
         gender = get_word_token_gender(word)
 
         note = genanki.Note(model=anki_note_model, fields=[word.text, sent, translate_word(word.lemma_), word.tag_, gender])
-        deck.add_note(note)
-    genanki.Package(deck).write_to_file('testpy.apkg')
+        note_tuple = (fdist[word.text] * -1, word.text, note) # priority, word, Note
+        # heapq.heappush(heap, note_tuple) # because python has no max heap
+        arrraay.append(note_tuple)
+        print(note_tuple[0], note_tuple[1])
+        # TODO create separate class for this?
+        # deck.add_note(note)
+
+    # add heap to deck
+    # while len(heap) > 0:
+    #     print("HEAP LENGTH", len(heap), heap[0][1])
+    #     note = heapq.heappop(heap)
+    #     print("NEW TOP", heap[0][1], "CHILD", heap[2][1], "OTHER CHILD", heap[3][1])
+    #     deck.add_note(note)
+
+    # for i in range(len(arrraay)):
+    #     for j in range(i+1, len(arrraay)):
+    #         print(arrraay[i][:2], arrraay[j][:2], "EQUALS", arrraay[i] == arrraay[j])
+
+    for n in arrraay:
+        print(n[:2])
+    arrraay.sort()
+
+    for n in arrraay:
+        print(n[:2])
+
+    # for n in arrraay:
+    #     print(n[0], n[1])
+
+    # genanki.Package(deck).write_to_file('testpy.apkg')
 
 def main_prog(filename):
     try:
