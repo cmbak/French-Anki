@@ -37,10 +37,6 @@ gender_colour_map = {
     'Fem' : '#ff8080'
 }
 
-# For now, only one sentence example sentence is used if a word appears multiple times in the text
-# This will be the first sentence that the word appears in
-# word_in_deck = dict
-
 def validate_file_format(file_path):
     split_file_path = file_path.split('.')
     if len(split_file_path) != 2 or split_file_path[1] != 'txt':
@@ -108,6 +104,10 @@ def create_anki_note(sentence, fdist, heap):
     doc = [word for word in nlp(sentence) if word.text.isalpha()]
 
     for word in doc:
+        # ensure that word won't have multiple notes
+        if fdist[word.text] > 1 or fdist[word.text] == 0: # 0 if stopword or one letter (see main)
+            continue
+
         gender = get_word_token_gender(word)
         note = SortableNote(anki_note_model, [word.text, sentence, translate_word(word.lemma_), word.tag_, gender], fdist[word.text])
         note.priority *= -1 # Python has no max heap!
@@ -130,6 +130,7 @@ def create_deck_from_heap(heap):
     deck = genanki.Deck(DECK_ID, 'ANKI LANGUAGE PY')
     add_heap_to_deck(heap, deck)
     genanki.Package(deck).write_to_file('testpy.apkg')
+    print("Deck created successfully!")
 
 def main_prog(filename):
     print(f'{filename} has been found...')
@@ -143,15 +144,13 @@ def main_prog(filename):
         words = [word.lower() for word in word_tokenize(file) if word.isalpha() and word not in stopwords and len(word)>1]
         fdist = FreqDist(words)
         words = set(words)
-        # Is it faster to create a set after or to use a dictionary to count instances
         heap = []
-            
-        # for sent in sentences:
-        #     create_anki_note(sent, fdist, heap)
-        
-        # create_deck_from_heap(heap)
 
-        print("Deck created successfully!")
+        for sent in sentences:
+            create_anki_note(sent, fdist, heap)
+        
+        create_deck_from_heap(heap)
+
         # TODO need to ensure SET of words
 
     except Exception as e:
