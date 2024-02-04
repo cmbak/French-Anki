@@ -67,7 +67,7 @@ anki_note_model = genanki.Model(
     templates=[
         {
             'name': 'Card PY GEN',
-            'qfmt': '<div id="french-word"><b>{{Word}} {{LemmatizedWord}}</b></div><div id="sentence"><br />{{Sentence}}</div>',
+            'qfmt': '<div id="french-word"><b>{{Word}}</b> {{LemmatizedWord}}</div><div id="sentence"><br />{{Sentence}}</div>',
             'afmt': '{{FrontSide}}<hr id="answer"><em id="tag">{{Tag}}</em> <b>{{Translation}}<b><div id="gender">{{Gender}}</div>'
         }
     ],
@@ -110,7 +110,19 @@ def create_anki_note(sentence, fdist, heap):
             continue
 
         gender = get_word_token_gender(word)
-        note = SortableNote(anki_note_model, [word.text, word.lemma_, sentence, translate_word(word.lemma_), word.tag_, gender], fdist[word.text]) # NOTE: word on card may be different to word in fdist due to lemmatizing
+
+        # Only want to show lemmatized version of the word if it's different to original version of the word
+        # Temp solution for this is to use an empty string
+        if word.text.casefold() == word.lemma_.casefold():
+            lemmatized_word = ''
+        else:
+            lemmatized_word = word.lemma_
+
+        #PROBLEM IMPORTANT AND IMPORTANTE
+        # DON'T WANT WHICHEVER COMES SECOND
+        # 
+
+        note = SortableNote(anki_note_model, [word.text, lemmatized_word, sentence, translate_word(word.lemma_), word.tag_, gender], fdist[word.text]) # NOTE: word on card may be different to word in fdist due to lemmatizing
         note.priority *= -1 # Python has no max heap!
         heapq.heappush(heap, note)
 
