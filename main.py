@@ -100,6 +100,18 @@ anki_note_model = genanki.Model(
         '''
 )
 
+
+# Returns t/f depending on if there's been a note created with the same word already
+# E.g. importante (f) will return false if a note has been created with important (m) on it
+# Bit inefficient!
+def check_if_note_exists(heap, word):
+    if len(word.lemma_) > 1:
+        for note in heap:
+            if note.word_on_card and word.lemma_ == note.word_on_card:
+                print(f'A note with {word.lemma_} already exists - not adding {word.text}')
+                return True
+    return False
+
 # creates anki notes from a sentence
 # adds the note to a HEAP so that the deck will be (initially) in priority order (more frequent words first)
 def create_anki_note(sentence, fdist, heap):
@@ -107,27 +119,23 @@ def create_anki_note(sentence, fdist, heap):
 
     for word in doc:
         # ensure that word won't have multiple notes
-        if fdist[word.text] > 1 or fdist[word.text] == 0: # 0 if stopword or one letter (see main)
+        if fdist[word.text] > 1 or fdist[word.text] == 0 or check_if_note_exists(heap, word): # 0 if stopword or one letter (see main)
             continue
 
+        word_on_card = word.text
         gender = get_word_token_gender(word)
 
         # Only want to show lemmatized version of the word if it's different to original version of the word
         # Temp solution for this is to use an empty string
         if word.text.casefold() == word.lemma_.casefold():
             lemmatized_word = ''
-            # FIXME AD HOC SOLUTION FOR IMPORTANT IMPORTANTE PROBLEM
-            word_on_card = word.text
-
         else:
             lemmatized_word = word.lemma_
-            word_on_card = word.text
+            word_on_card = word.lemma_
 
         note = SortableNote(anki_note_model, [word.text, lemmatized_word, sentence, translate_word(word.lemma_), word.tag_, gender], fdist[word.text], word_on_card) # NOTE: word on card may be different to word in fdist due to lemmatizing
         note.priority *= -1 # Python has no max heap!
         heapq.heappush(heap, note)
-
-        print(f'Word on the card is {word_on_card}, lemmatized is f{lemmatized_word}')
 
 def add_heap_to_deck(heap, deck):
     while len(heap) > 0:
@@ -173,7 +181,7 @@ def main_prog(filename):
         for sent in sentences:
             create_anki_note(sent, fdist, heap)
         
-        # create_deck_from_heap(heap)
+        create_deck_from_heap(heap)
 
         # TODO need to ensure SET of words
 
