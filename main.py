@@ -1,3 +1,5 @@
+import sys
+import os
 import argparse
 import heapq
 import translators as ts
@@ -31,7 +33,6 @@ nlp = spacy.load('fr_core_news_sm')
 
 parser = argparse.ArgumentParser(description='Convert a piece of French text (utf-8) into Anki cards')
 parser.add_argument('filename', nargs=1, help='name of the file to create Anki cards from') # TODO Add multiple file implementation later
-args = parser.parse_args()
 
 # For anki styling
 gender_colour_map = {
@@ -39,9 +40,8 @@ gender_colour_map = {
     'Fem' : '#ff8080'
 }
 
-def validate_file_format(file_path):
-    split_file_path = file_path.split('.')
-    if len(split_file_path) != 2 or split_file_path[1] != 'txt':
+def validate_file_format(args):
+    if len(args) > 1 or len(args) == 0 or not os.path.exists(args[0]):
         return False
     return True
 
@@ -138,7 +138,9 @@ def main_prog(filename):
     except Exception as e:
         print('Sorry, something went wrong:', str(e))
 
-if validate_file_format(args.filename[0]):
-    main_prog(args.filename[0])
+args = sys.argv[1:]
+if validate_file_format(args):
+    print(f'{args[0]} is a valid file! SPLIT:{args[0].split('.txt')}')
+    # main_prog(args[0])
 else:
     print("Please enter a valid file format (.txt)")
