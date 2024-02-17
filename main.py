@@ -51,11 +51,12 @@ def validate_file_format(args):
     path = args[0]
     if sys.platform == 'win32':
         path = path.replace('\\', '/')
-    #print('path', path, sys.platform, os.path.exists(path))
     if not os.path.exists(path):
         return (False, 'Please enter a valid file path!')
-    # # TODO VALIDATE THAT IT'S A TEXT FILE!
-    # # TODO FIX VALIDATION!
+    
+    split_path = path.split('.')
+    if len(split_path) > 2 or split_path[1].casefold() != 'txt':
+        return (False, 'Please enter a valid file format (.txt)!')
     return (True, f'{args[0]} has been found!')
 
 def translate_word(word):
@@ -154,7 +155,6 @@ def main_prog(filename):
 args = sys.argv[1:]
 is_valid, msg = validate_file_format(args);
 if is_valid:
-    print(f'{args[0]} is a valid file! SPLIT:{args[0].split('.txt')} {args[0].split('.')}')
-    # main_prog(args[0])
+    main_prog(args[0])
 else:
     print(msg)
