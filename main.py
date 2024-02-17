@@ -1,4 +1,6 @@
-import argparse
+import sys
+import os
+# import argparse
 import heapq
 import translators as ts
 from reverso_context_api import Client
@@ -29,9 +31,8 @@ nlp = spacy.load('fr_core_news_sm')
 # SAMPLE TEXTS FROM LAWLESS FRENCH https://www.lawlessfrench.com
 # sample_texts/art_de_la_traduction.txt
 
-parser = argparse.ArgumentParser(description='Convert a piece of French text (utf-8) into Anki cards')
-parser.add_argument('filename', nargs=1, help='name of the file to create Anki cards from') # TODO Add multiple file implementation later
-args = parser.parse_args()
+# parser = argparse.ArgumentParser(description='Convert a piece of French text (utf-8) into Anki cards')
+# parser.add_argument('filename', nargs=1, help='name of the file to create Anki cards from') # TODO Add multiple file implementation later
 
 # For anki styling
 gender_colour_map = {
@@ -39,11 +40,24 @@ gender_colour_map = {
     'Fem' : '#ff8080'
 }
 
-def validate_file_format(file_path):
-    split_file_path = file_path.split('.')
-    if len(split_file_path) != 2 or split_file_path[1] != 'txt':
-        return False
-    return True
+# Returns a tuple - (boolean representing if path/args are valid, appropriate message to be printed)
+# NOTE FORMAT OF PATH MATTERS
+# Windows: Double quotes "" around path
+# os.path.exists() throws unicode error if using normal windows path
+# calling this fn will replace the \ with / if user is on windows
+def validate_file_format(args):
+    if len(args) > 1 or len(args) == 0:
+        return (False, 'Please enter')
+    path = args[0]
+    if sys.platform == 'win32':
+        path = path.replace('\\', '/')
+    if not os.path.exists(path):
+        return (False, 'Please enter a valid file path!')
+    
+    split_path = path.split('.')
+    if len(split_path) > 2 or split_path[1].casefold() != 'txt':
+        return (False, 'Please enter a valid file format (.txt)!')
+    return (True, f'{args[0]} has been found!')
 
 def translate_word(word):
     return ts.translate_text(word, translator=translator, from_language='fr', to_language=translate_to_lang)
@@ -138,7 +152,9 @@ def main_prog(filename):
     except Exception as e:
         print('Sorry, something went wrong:', str(e))
 
-if validate_file_format(args.filename[0]):
-    main_prog(args.filename[0])
+args = sys.argv[1:]
+is_valid, msg = validate_file_format(args);
+if is_valid:
+    main_prog(args[0])
 else:
-    print("Please enter a valid file format (.txt)")
+    print(msg)
