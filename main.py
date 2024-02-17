@@ -8,6 +8,7 @@ from nltk.probability import FreqDist
 from nltk.corpus import stopwords
 import spacy
 import genanki
+import re
 
 from SortableNote import SortableNote
 
@@ -115,16 +116,18 @@ def create_anki_note(sentence, fdist, heap):
         # Temp solution for this is to use an empty string
         if word.text.casefold() == word.lemma_.casefold():
             lemmatized_word = ''
+            # FIXME AD HOC SOLUTION FOR IMPORTANT IMPORTANTE PROBLEM
+            word_on_card = word.text
+
         else:
             lemmatized_word = word.lemma_
+            word_on_card = word.text
 
-        #PROBLEM IMPORTANT AND IMPORTANTE
-        # DON'T WANT WHICHEVER COMES SECOND
-        # 
-
-        note = SortableNote(anki_note_model, [word.text, lemmatized_word, sentence, translate_word(word.lemma_), word.tag_, gender], fdist[word.text]) # NOTE: word on card may be different to word in fdist due to lemmatizing
+        note = SortableNote(anki_note_model, [word.text, lemmatized_word, sentence, translate_word(word.lemma_), word.tag_, gender], fdist[word.text], word_on_card) # NOTE: word on card may be different to word in fdist due to lemmatizing
         note.priority *= -1 # Python has no max heap!
         heapq.heappush(heap, note)
+
+        print(f'Word on the card is {word_on_card}, lemmatized is f{lemmatized_word}')
 
 def add_heap_to_deck(heap, deck):
     while len(heap) > 0:
@@ -140,7 +143,7 @@ def get_word_token_gender(word):
 
 def create_deck_from_heap(heap):
     DECK_ID = 1479086433
-    deck = genanki.Deck(DECK_ID, 'ANKI LANGUAGE PY')
+    deck = genanki.Deck(DECK_ID, 'ANKI LANGUAGE SPACY PY')
     add_heap_to_deck(heap, deck)
     genanki.Package(deck).write_to_file('testpy.apkg')
     print("Deck created successfully!")
@@ -151,18 +154,26 @@ def main_prog(filename):
         file = ""
         
         with open(filename, encoding="utf-8") as f: # Will only get 1 file
-            file = f.read() 
+            file = f.read()
+
+        file = re.sub(r'\s+', ' ', file)
         
         sentences = sent_tokenize(file, language='french')
         words = [word.lower() for word in word_tokenize(file) if word.isalpha() and word.lower() not in stopwords and len(word)>1]
         fdist = FreqDist(words)
         words = set(words)
         heap = []
+        
+        # lemmatized_words_added = set()
+
+        # spacy_doc = nlp(file)
+        # spacy_words = {token.lemma_ for token in spacy_doc if token.is_stop == False and token.is_punct == False and token.text.startswith("-") == False}
+        # print(spacy_words)
 
         for sent in sentences:
             create_anki_note(sent, fdist, heap)
         
-        create_deck_from_heap(heap)
+        # create_deck_from_heap(heap)
 
         # TODO need to ensure SET of words
 
