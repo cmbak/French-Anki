@@ -10,6 +10,7 @@ import spacy
 import genanki
 import re
 
+from anki_note_model import anki_note_model
 from SortableNote import SortableNote
 
 # Translation
@@ -51,55 +52,6 @@ def translate_word(word):
     # if len(translations) < 3:
     #     return translations
     # return translations[:3]
-
-
-# TODO Conditional formatting?
-anki_note_model = genanki.Model(
-    1770821663,
-    'PY Sentence Mining Model',
-    fields=[
-        {'name': 'Word'},
-        {'name': 'LemmatizedWord'},
-        {'name': 'Sentence'},
-        {'name': 'Translation'},
-        {'name': 'Tag'},
-        {'name': 'Gender'}
-    ],
-    templates=[
-        {
-            'name': 'Card PY GEN',
-            'qfmt': '<div id="french-word"><b>{{Word}}</b> {{LemmatizedWord}}</div><div id="sentence"><br />{{Sentence}}</div>',
-            'afmt': '{{FrontSide}}<hr id="answer"><em id="tag">{{Tag}}</em> <b>{{Translation}}<b><div id="gender">{{Gender}}</div>'
-        }
-    ],
-    css='''
-        .card {
-            padding: 1.5rem;
-            font-size: 2.2rem;
-            font-family: Arial;
-            text-align: center;
-        }
-
-        #answer {
-            margin: 1rem auto;
-        }
-
-        #sentence {
-            margin-bottom: 2.5rem;
-        }
-
-        #tag {
-            color:gray;
-            font-size: 1.1rem;
-            margin-right: 0.8rem;
-        }
-        
-        #gender {
-            font-weight: normal;
-        }
-        '''
-)
-
 
 # Returns t/f depending on if there's been a note created with the same word already
 # E.g. importante (f) will return false if a note has been created with important (m) on it
@@ -182,8 +134,6 @@ def main_prog(filename):
             create_anki_note(sent, fdist, heap)
         
         create_deck_from_heap(heap)
-
-        # TODO need to ensure SET of words
 
     except Exception as e:
         print('Sorry, something went wrong:', str(e))
