@@ -48,7 +48,7 @@ def validate_file_format(args):
         return (False, 'Please enter a valid file path!')
     
     split_path = path.split('.')
-    if len(split_path) > 2 or split_path[1].casefold() != 'txt':
+    if len(split_path) < 2 or len(split_path) > 2 or split_path[1].casefold() != 'txt':
         return (False, 'Please enter a valid file format (.txt)!')
 
     return (True, f'{args[0]} has been found!')
