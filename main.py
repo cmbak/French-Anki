@@ -177,10 +177,7 @@ def main_prog(filename):
                 if not word.is_stop and word.is_alpha:
                     processed_words.append(word)
 
-        # tokenize the sentences
-            # these get spacyed in create-anki-note
-        # tokenize the words
-        # frequency distribution of the words
+        create_freq_dist(processed_words)
 
         # for sent in sentences:
         #     create_anki_note(sent, fdist, heap)
