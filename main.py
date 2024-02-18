@@ -11,6 +11,7 @@ from nltk.corpus import stopwords
 import spacy
 import genanki
 import re
+from gtts import gTTS
 
 from anki_note_model import anki_note_model
 from SortableNote import SortableNote
@@ -78,6 +79,15 @@ def check_if_note_exists(heap, word):
                 return True
     return False
 
+# creates an mp3 file of the given word in XYZ directory and returns the file name (+ ext)
+def create_word_audio(word):
+    tts = gTTS(word, lang='fr')
+    genanki_path = f'{word}.mp3'
+    path = 'test/' + genanki_path
+    tts.save(path)
+    media_files.append(path)
+    return genanki_path
+
 # creates anki notes from a sentence
 # adds the note to a HEAP so that the deck will be (initially) in priority order (more frequent words first)
 def create_anki_note(sentence, fdist, heap):
@@ -99,7 +109,9 @@ def create_anki_note(sentence, fdist, heap):
             lemmatized_word = word.lemma_
             word_on_card = word.lemma_
 
-        note = SortableNote(anki_note_model, [word.text, lemmatized_word, sentence, translate_word(word.lemma_), word.tag_, gender], fdist[word.text], word_on_card) # NOTE: word on card may be different to word in fdist due to lemmatizing
+        word_audio_path = create_word_audio(word_on_card)
+
+        note = SortableNote(anki_note_model, [word.text, lemmatized_word, sentence, translate_word(word.lemma_), word.tag_, gender, f'[sound:{word_audio_path}]'], fdist[word.text], word_on_card) # NOTE: word on card may be different to word in fdist due to lemmatizing
         note.priority *= -1 # Python has no max heap!
         heapq.heappush(heap, note)
 
@@ -116,10 +128,10 @@ def get_word_token_gender(word):
     return ''
 
 def create_deck_from_heap(heap):
-    DECK_ID = 1479086433
-    deck = genanki.Deck(DECK_ID, 'ANKI LANGUAGE SPACY PY')
     add_heap_to_deck(heap, deck)
-    genanki.Package(deck).write_to_file('testpy.apkg')
+    package = genanki.Package(deck)
+    package.media_files = media_files
+    package.write_to_file('testpy.apkg')
     print("Deck created successfully!")
 
 def main_prog(filename):
@@ -155,6 +167,9 @@ def main_prog(filename):
 args = sys.argv[1:]
 is_valid, msg = validate_file_format(args);
 if is_valid:
+    DECK_ID = 1479086433
+    deck = genanki.Deck(DECK_ID, 'ANKI LANGUAGE SPACY PY')
+    media_files = []
     main_prog(args[0])
 else:
     print(msg)

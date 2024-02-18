@@ -10,12 +10,13 @@ anki_note_model = Model(
         {'name': 'Sentence'},
         {'name': 'Translation'},
         {'name': 'Tag'},
-        {'name': 'Gender'}
+        {'name': 'Gender'},
+        {'name': 'MyMedia'},
     ],
     templates=[
         {
             'name': 'Card PY GEN',
-            'qfmt': '<div id="french-word"><b>{{Word}}</b> {{LemmatizedWord}}</div><div id="sentence"><br />{{Sentence}}</div>',
+            'qfmt': '<div id="french-word"><b>{{Word}}</b> {{LemmatizedWord}}</div><div id="sentence"><br />{{Sentence}}</div>{{MyMedia}}',
             'afmt': '{{FrontSide}}<hr id="answer"><em id="tag">{{Tag}}</em> <b>{{Translation}}<b><div id="gender">{{Gender}}</div>'
         }
     ],
