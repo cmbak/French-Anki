@@ -180,4 +180,4 @@ pyrightconfig.json
 /PY_TTS_AUDIO
 
 # Anki
-.apkg
+*.apkg
