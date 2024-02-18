@@ -62,7 +62,7 @@ def translate_word(word):
     # return translations[:3]
 
 # Creates an mp3 file of the given word and saves it in directory specified by the var TTS_AUDIO_DIR; returns the path to that file
-def create_word_audio(word):
+def create_word_audio(word, media_files):
     tts = gTTS(word, lang='fr')
     genanki_path = f'{word}.mp3'
     path = TTS_AUDIO_DIR + genanki_path
@@ -90,7 +90,7 @@ def create_anki_note(word, fdist, heap):
         lemmatized_word = word.lemma_
         word_on_card = word.lemma_
 
-    word_audio_path = create_word_audio(word.text) # Non-lemmatized version!
+    word_audio_path = create_word_audio(word.text, media_files) # Non-lemmatized version!
 
     note = SortableNote(anki_note_model, [word.text, lemmatized_word, word.sent.text, translate_word(word.lemma_), word.tag_, gender, f'[sound:{word_audio_path}]'], fdist[word.text], word_on_card) # NOTE: word on card may be different to word in fdist due to lemmatizing
     note.priority *= -1 # Python has no max heap!
