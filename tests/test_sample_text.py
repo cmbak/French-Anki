@@ -69,7 +69,7 @@ def test_create_anki_note():
     processed_words = []
     main.process_words(processed_words, nlp_sentence())
     fdist = main.create_freq_dist(processed_words)
-    main.create_anki_note(word_token, fdist, [])
+    main.create_anki_note(word_token, fdist, [], [])
     
     assert fdist == {'art': 1}
     
