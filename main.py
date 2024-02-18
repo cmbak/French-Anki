@@ -1,5 +1,6 @@
 import sys
 import os
+import shutil
 # import argparse
 import heapq
 import translators as ts
@@ -40,6 +41,10 @@ gender_colour_map = {
     'Masc' : '#80aaff',
     'Fem' : '#ff8080'
 }
+
+# TTS Audio deletion
+TTS_AUDIO_DIR = 'PY_TTS_AUDIO/' # Safer way to do this?
+delete_audio_folder = True
 
 # Returns a tuple - (boolean representing if path/args are valid, appropriate message to be printed)
 # NOTE FORMAT OF PATH MATTERS
@@ -83,15 +88,23 @@ def check_if_note_exists(heap, word):
 def create_word_audio(word):
     tts = gTTS(word, lang='fr')
     genanki_path = f'{word}.mp3'
-    path = 'test/' + genanki_path
+    path = TTS_AUDIO_DIR + genanki_path
     tts.save(path)
     media_files.append(path)
     return genanki_path
+
+# Creates the directory which temporarily stores the audio files - name of dir is value of TTS_AUDIO_DIR
+# This will get deleted after
+def create_tts_dir():
+    if not os.path.exists(TTS_AUDIO_DIR):
+        os.mkdir(TTS_AUDIO_DIR)
 
 # creates anki notes from a sentence
 # adds the note to a HEAP so that the deck will be (initially) in priority order (more frequent words first)
 def create_anki_note(sentence, fdist, heap):
     doc = [word for word in nlp(sentence) if word.text.isalpha()]
+
+    create_tts_dir()
 
     for word in doc:
         # ensure that word won't have multiple notes
@@ -149,8 +162,6 @@ def main_prog(filename):
         fdist = FreqDist(words)
         words = set(words)
         heap = []
-        
-        # lemmatized_words_added = set()
 
         # spacy_doc = nlp(file)
         # spacy_words = {token.lemma_ for token in spacy_doc if token.is_stop == False and token.is_punct == False and token.text.startswith("-") == False}
@@ -160,6 +171,9 @@ def main_prog(filename):
             create_anki_note(sent, fdist, heap)
         
         create_deck_from_heap(heap)
+
+        if delete_audio_folder:
+            shutil.rmtree(TTS_AUDIO_DIR)
 
     except Exception as e:
         print('Sorry, something went wrong:', str(e))
