@@ -3,10 +3,10 @@ import sys
 from main import validate_file_format
 
 def test_no_file_args():
-    assert validate_file_format([]) == (False, 'Please enter')
+    assert validate_file_format([]) == (False, 'Please enter a path to the text file')
 
 def test_too_many_file_args():
-    assert validate_file_format(['file1.txt', 'file2.txt']) == (False, 'Please enter')
+    assert validate_file_format(['file1.txt', 'file2.txt']) == (False, 'Please enter a path to the text file')
 
 def test_invalid_path():
     assert validate_file_format(['file1.txt']) == (False, 'Please enter a valid file path!')

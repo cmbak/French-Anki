@@ -33,12 +33,12 @@ delete_audio_folder = True
 
 # Returns a tuple - (boolean representing if path/args are valid, appropriate message to be printed)
 # NOTE FORMAT OF PATH MATTERS
-# Windows: Double quotes "" around path
+# Double quotes "" around path if it contains a space
 # os.path.exists() throws unicode error if using normal windows path
 # So calling this fn will replace the \ with / if user is on windows
 def validate_file_format(args):
     if len(args) > 1 or len(args) == 0:
-        return (False, 'Please enter')
+        return (False, 'Please enter a path to the text file')
     
     path = args[0]
     if sys.platform == 'win32':
