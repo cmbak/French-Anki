@@ -26,7 +26,6 @@ lxml==5.1.0
 MarkupSafe==2.1.4
 multiprocess==0.70.16
 murmurhash==1.0.10
-nltk==3.8.1
 numpy==1.26.3
 packaging==23.2
 pathos==0.3.2
@@ -40,7 +39,6 @@ PyExecJS==1.5.1
 PyYAML==6.0.1
 regex==2023.12.25
 requests==2.31.0
-reverso_context_api==0.5
 setuptools==69.0.3
 six==1.16.0
 smart-open==6.4.0

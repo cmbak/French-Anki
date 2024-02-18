@@ -3,7 +3,6 @@ import os
 import shutil
 import heapq
 import translators as ts
-from reverso_context_api import Client
 import spacy
 import genanki
 from gtts import gTTS
@@ -13,7 +12,6 @@ from SortableNote import SortableNote
 # Translation
 translator = 'google'
 translate_to_lang = 'en'
-client = Client('fr', translate_to_lang)
 
 # spacy
 # py -m spacy download fr_core_news_sm (more eff than dep_news_trf)
