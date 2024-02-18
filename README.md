@@ -18,7 +18,7 @@ git clone https://github.com/cmbak/French-Anki.git
 2. Install the required packages using pip
 ```bash
 cd French Anki
-pip install requirements.txt
+python -m pip install requirements.txt
 ```
 
 ## Usage
