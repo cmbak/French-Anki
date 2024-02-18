@@ -17,7 +17,7 @@ def test_not_text_file():
 def test_valid_path():
     if sys.platform == 'win32':
         path_to_sample = 'sample_texts\\art_de_la_traduction.txt'
-    elif sys.platform == 'linux' or sys.platform == 'win32':
+    elif sys.platform == 'linux' or sys.platform == 'darwin':
         path_to_sample = 'sample_texts/art_de_la_traduction.txt'
     path_to_file = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', path_to_sample)) # Need to go up one dir
     assert validate_file_format([path_to_file]) == (True, f'{path_to_file} has been found!')
