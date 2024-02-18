@@ -78,7 +78,7 @@ def create_tts_dir():
 
 # Creates an anki note from a word (spacy token)
 # Adds the note to a heap so that the deck will (initially) be in priority order (more frequent words first)
-def create_anki_note(word, fdist, heap):
+def create_anki_note(word, fdist, heap, media_files):
     word_on_card = word.text
     gender = get_word_token_gender(word)
 
@@ -110,7 +110,7 @@ def get_word_token_gender(word):
         return gender[0]
     return ''
 
-def create_deck_from_heap(heap):
+def create_deck_from_heap(heap, media_files):
     add_heap_to_deck(heap, deck)
     package = genanki.Package(deck)
     package.media_files = media_files
@@ -147,6 +147,8 @@ def main_prog(filename):
     except Exception as e:
         print('Sorry, something went wrong:', str(e))
 
+    media_files = []
+
     heap = []
     doc = nlp(file)
     sentences = [sent for sent in doc.sents]
@@ -161,9 +163,9 @@ def main_prog(filename):
     # Creates the anki notes for all the words
     for word in processed_words:
         if word.text in freq_dist: # Don't want the same word to have many cards for its different forms
-            create_anki_note(word, freq_dist_copy, heap)
+            create_anki_note(word, freq_dist_copy, heap, media_files)
     
-    create_deck_from_heap(heap)
+    create_deck_from_heap(heap, media_files)
 
     if delete_audio_folder:
         try:
@@ -181,7 +183,6 @@ is_valid, msg = validate_file_format(args);
 if is_valid:
     DECK_ID = 1479086433
     deck = genanki.Deck(DECK_ID, 'FRENCH GEN PY')
-    media_files = []
     main_prog(args[0])
 else:
     print(msg)
