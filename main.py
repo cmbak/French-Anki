@@ -31,7 +31,6 @@ stopwords = set(stopwords.words('french'))
 nlp = spacy.load('fr_core_news_sm')
 
 # SAMPLE TEXTS FROM LAWLESS FRENCH https://www.lawlessfrench.com
-# sample_texts/art_de_la_traduction.txt
 
 # parser = argparse.ArgumentParser(description='Convert a piece of French text (utf-8) into Anki cards')
 # parser.add_argument('filename', nargs=1, help='name of the file to create Anki cards from') # TODO Add multiple file implementation later
@@ -50,7 +49,7 @@ delete_audio_folder = True
 # NOTE FORMAT OF PATH MATTERS
 # Windows: Double quotes "" around path
 # os.path.exists() throws unicode error if using normal windows path
-# calling this fn will replace the \ with / if user is on windows
+# So calling this fn will replace the \ with / if user is on windows
 def validate_file_format(args):
     if len(args) > 1 or len(args) == 0:
         return (False, 'Please enter')
@@ -84,7 +83,7 @@ def check_if_note_exists(heap, word):
                 return True
     return False
 
-# creates an mp3 file of the given word in XYZ directory and returns the file name (+ ext)
+# Creates an mp3 file of the given word in XYZ directory and returns the path to that file
 def create_word_audio(word):
     tts = gTTS(word, lang='fr')
     genanki_path = f'{word}.mp3'
@@ -99,8 +98,8 @@ def create_tts_dir():
     if not os.path.exists(TTS_AUDIO_DIR):
         os.mkdir(TTS_AUDIO_DIR)
 
-# creates anki notes from a sentence
-# adds the note to a HEAP so that the deck will be (initially) in priority order (more frequent words first)
+# Creates anki notes from a sentence
+# Adds the note to a heap so that the deck will (initially) be in priority order (more frequent words first)
 def create_anki_note(sentence, fdist, heap):
     doc = [word for word in nlp(sentence) if word.text.isalpha()]
 
@@ -178,8 +177,11 @@ def main_prog(filename):
     except Exception as e:
         print('Sorry, something went wrong:', str(e))
 
+# ==========================================================
+
 args = sys.argv[1:]
 is_valid, msg = validate_file_format(args);
+
 if is_valid:
     DECK_ID = 1479086433
     deck = genanki.Deck(DECK_ID, 'ANKI LANGUAGE SPACY PY')
