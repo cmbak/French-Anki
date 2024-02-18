@@ -148,6 +148,20 @@ def create_deck_from_heap(heap):
     package.write_to_file('spacy_testpy.apkg')
     print("Deck created successfully!")
 
+# Returns dictionary of word:frequency
+# Doesn't add different forms of a word to the dictionary
+# E.g. importante AND important - only first occurrence is included
+def create_freq_dist(words):
+    freq_dist = dict()
+    for word in words:
+        if word.lemma_ in freq_dist:
+            freq_dist[word.lemma_] += 1
+        elif word.text in freq_dist:
+            freq_dist[word.text] += 1
+        elif word.text not in freq_dist:
+            freq_dist[word.text] = 1
+    return freq_dist
+
 def main_prog(filename):
     print(f'{filename} has been found...')
     try:
@@ -171,13 +185,14 @@ def main_prog(filename):
         # ==== SPACY ====
         doc = nlp(file)
         sentences = [sent for sent in doc.sents]
-        processed_words = []
+        processed_words = [] # spacy tokens
         for sent in sentences:
             for word in sent:
                 if not word.is_stop and word.is_alpha:
                     processed_words.append(word)
 
-        create_freq_dist(processed_words)
+        freq_dist = create_freq_dist(processed_words)
+        print(freq_dist, len(freq_dist))
 
         # for sent in sentences:
         #     create_anki_note(sent, fdist, heap)
