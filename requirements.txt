@@ -11,7 +11,7 @@ click==8.1.7
 cloudpathlib==0.16.0
 colorama==0.4.6
 confection==0.1.4
-cryptography==42.0.1
+cryptography==42.0.2
 cymem==2.0.8
 dill==0.3.8
 fr-core-news-sm @ https://github.com/explosion/spacy-models/releases/download/fr_core_news_sm-3.7.0/fr_core_news_sm-3.7.0-py3-none-any.whl#sha256=37e9f1f6a278a5138fabdabcc92cc559da917f9b24c76f0adf6758720d7eab10
