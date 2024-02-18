@@ -114,7 +114,7 @@ def create_deck_from_heap(heap):
     add_heap_to_deck(heap, deck)
     package = genanki.Package(deck)
     package.media_files = media_files
-    package.write_to_file('spacy_testpy.apkg')
+    package.write_to_file('french_gen_py.apkg')
     print("Deck created successfully!")
 
 # Returns dictionary of word:frequency
