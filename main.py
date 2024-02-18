@@ -7,7 +7,6 @@ from reverso_context_api import Client
 import spacy
 import genanki
 from gtts import gTTS
-
 from anki_note_model import anki_note_model
 from SortableNote import SortableNote
 
@@ -64,7 +63,7 @@ def translate_word(word):
     #     return translations
     # return translations[:3]
 
-# Creates an mp3 file of the given word in XYZ directory and returns the path to that file
+# Creates an mp3 file of the given word and saves it in directory specified by the var TTS_AUDIO_DIR; returns the path to that file
 def create_word_audio(word):
     tts = gTTS(word, lang='fr')
     genanki_path = f'{word}.mp3'
@@ -82,7 +81,6 @@ def create_tts_dir():
 # Creates an anki note from a word (spacy token)
 # Adds the note to a heap so that the deck will (initially) be in priority order (more frequent words first)
 def create_anki_note(word, fdist, heap):
-    create_tts_dir()
     word_on_card = word.text
     gender = get_word_token_gender(word)
 
@@ -160,7 +158,8 @@ def main_prog(filename):
 
     freq_dist = create_freq_dist(processed_words)
     freq_dist_copy = freq_dist # used for create_anki_note
-    
+    create_tts_dir()
+
     # Creates the anki notes for all the words
     for word in processed_words:
         if word.text in freq_dist: # Don't want the same word to have many cards for its different forms
@@ -183,7 +182,7 @@ is_valid, msg = validate_file_format(args);
 
 if is_valid:
     DECK_ID = 1479086433
-    deck = genanki.Deck(DECK_ID, 'ANKI LANGUAGE SPACY PY')
+    deck = genanki.Deck(DECK_ID, 'FRENCH GEN PY')
     media_files = []
     main_prog(args[0])
 else:
