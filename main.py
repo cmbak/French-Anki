@@ -1,17 +1,11 @@
 import sys
 import os
 import shutil
-# import argparse
 import heapq
 import translators as ts
 from reverso_context_api import Client
-from nltk.tokenize import sent_tokenize, word_tokenize
-from nltk.probability import FreqDist
-# nltk.download('stopwords')
-from nltk.corpus import stopwords
 import spacy
 import genanki
-import re
 from gtts import gTTS
 
 from anki_note_model import anki_note_model
@@ -22,10 +16,6 @@ translator = 'google'
 translate_to_lang = 'en'
 client = Client('fr', translate_to_lang)
 
-# NLTK
-# NOTE - NLTK only has french tagger - could try changing to using spacy only
-stopwords = set(stopwords.words('french'))
-
 # spacy
 # py -m spacy download fr_core_news_sm (more eff than dep_news_trf)
 nlp = spacy.load('fr_core_news_sm')
@@ -33,9 +23,6 @@ nlp.add_pipe('sentencizer')
 spacy_stopwords = nlp.Defaults.stop_words
 
 # SAMPLE TEXTS FROM LAWLESS FRENCH https://www.lawlessfrench.com
-
-# parser = argparse.ArgumentParser(description='Convert a piece of French text (utf-8) into Anki cards')
-# parser.add_argument('filename', nargs=1, help='name of the file to create Anki cards from') # TODO Add multiple file implementation later
 
 # For anki styling
 gender_colour_map = {
@@ -55,15 +42,18 @@ delete_audio_folder = True
 def validate_file_format(args):
     if len(args) > 1 or len(args) == 0:
         return (False, 'Please enter')
+    
     path = args[0]
     if sys.platform == 'win32':
         path = path.replace('\\', '/')
+
     if not os.path.exists(path):
         return (False, 'Please enter a valid file path!')
     
     split_path = path.split('.')
     if len(split_path) > 2 or split_path[1].casefold() != 'txt':
         return (False, 'Please enter a valid file format (.txt)!')
+
     return (True, f'{args[0]} has been found!')
 
 def translate_word(word):
@@ -73,17 +63,6 @@ def translate_word(word):
     # if len(translations) < 3:
     #     return translations
     # return translations[:3]
-
-# Returns t/f depending on if there's been a note created with the same word already
-# E.g. importante (f) will return false if a note has been created with important (m) on it
-# Bit inefficient!
-def check_if_note_exists(heap, word):
-    if len(word.lemma_) > 1:
-        for note in heap:
-            if note.word_on_card and word.lemma_ == note.word_on_card:
-                print(f'A note with {word.lemma_} already exists - not adding {word.text}')
-                return True
-    return False
 
 # Creates an mp3 file of the given word in XYZ directory and returns the path to that file
 def create_word_audio(word):
@@ -104,12 +83,6 @@ def create_tts_dir():
 # Adds the note to a heap so that the deck will (initially) be in priority order (more frequent words first)
 def create_anki_note(word, fdist, heap):
     create_tts_dir()
-
-    # for word in doc:
-        # ensure that word won't have multiple notes
-        # if fdist[word.text] > 1 or fdist[word.text] == 0 or check_if_note_exists(heap, word): # 0 if stopword or one letter (see main)
-            # continue
-
     word_on_card = word.text
     gender = get_word_token_gender(word)
 
@@ -123,9 +96,11 @@ def create_anki_note(word, fdist, heap):
 
     word_audio_path = create_word_audio(word.text) # Non-lemmatized version!
 
-    note = SortableNote(anki_note_model, [word.text, lemmatized_word, sentence, translate_word(word.lemma_), word.tag_, gender, f'[sound:{word_audio_path}]'], fdist[word.text], word_on_card) # NOTE: word on card may be different to word in fdist due to lemmatizing
+    note = SortableNote(anki_note_model, [word.text, lemmatized_word, word.sent.text, translate_word(word.lemma_), word.tag_, gender, f'[sound:{word_audio_path}]'], fdist[word.text], word_on_card) # NOTE: word on card may be different to word in fdist due to lemmatizing
     note.priority *= -1 # Python has no max heap!
     heapq.heappush(heap, note)
+    
+    del fdist[word.text] # To prevent duplicate cards from being made
 
 def add_heap_to_deck(heap, deck):
     while len(heap) > 0:
@@ -160,52 +135,46 @@ def create_freq_dist(words):
             freq_dist[word.text] = 1
     return freq_dist
 
+# Filters stop words and non alphanumerical characters from text
+def process_words(processed_words, sentences):
+    for sent in sentences:
+        for word in sent:
+            if not word.is_stop and word.is_alpha:
+                processed_words.append(word)
+
 def main_prog(filename):
-    print(f'{filename} has been found...')
     try:
-        file = ""
-        
         with open(filename, encoding="utf-8") as f: # Will only get 1 file
             file = f.read()
-
-        file = re.sub(r'\s+', ' ', file)
-        
-        sentences = sent_tokenize(file, language='french')
-        words = [word.lower() for word in word_tokenize(file) if word.isalpha() and word.lower() not in stopwords and len(word)>1]
-        fdist = FreqDist(words)
-        words = set(words)
-        heap = []
-
-        # spacy_doc = nlp(file)
-        # spacy_words = {token.lemma_ for token in spacy_doc if token.is_stop == False and token.is_punct == False and token.text.startswith("-") == False}
-        # print(spacy_words)
-        # ==== SPACY ====
-        doc = nlp(file)
-        sentences = [sent for sent in doc.sents]
-        processed_words = [] # spacy tokens
-        for sent in sentences:
-            for word in sent:
-                if not word.is_stop and word.is_alpha:
-                    processed_words.append(word)
-
-        freq_dist = create_freq_dist(processed_words)
-        for word in freq_dist: # Already filtered out duplicates
-            create_anki_note(word, freq_dist, heap)
-
-        # for word in processed_words:
-        #     if word in freq_dist:
-        #         create_anki_note(word, freq_dist, heap)
-
-        # for sent in sentences:
-        #     create_anki_note(sent, fdist, heap)
-        
-        # create_deck_from_heap(heap)
-
-        # if delete_audio_folder:
-        #     shutil.rmtree(TTS_AUDIO_DIR)
-
+        # file = re.sub(r'\s+', ' ', file)
+        print(f'{filename} has been found...')
     except Exception as e:
         print('Sorry, something went wrong:', str(e))
+
+    heap = []
+    doc = nlp(file)
+    sentences = [sent for sent in doc.sents]
+    processed_words = [] # spacy tokens
+
+    process_words(processed_words, sentences)
+
+    freq_dist = create_freq_dist(processed_words)
+    freq_dist_copy = freq_dist # used for create_anki_note
+    
+    # Creates the anki notes for all the words
+    for word in processed_words:
+        if word.text in freq_dist: # Don't want the same word to have many cards for its different forms
+            create_anki_note(word, freq_dist_copy, heap)
+    
+    create_deck_from_heap(heap)
+
+    if delete_audio_folder:
+        try:
+            shutil.rmtree(TTS_AUDIO_DIR)
+        except PermissionError: # Should (hopefully) only be thrown if get WinError 5 (access is denied)
+            print(f'The directory {TTS_AUDIO_DIR} could not be deleted.')
+            print("It is safe to delete as the Anki deck has been created and exported successfully.")
+            print('Next time, try running this program as an administrator.')
 
 # ==========================================================
 

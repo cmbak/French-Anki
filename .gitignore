@@ -177,3 +177,7 @@ pyrightconfig.json
 
 # For my testing
 /test
+/PY_TTS_AUDIO
+
+# Anki
+.apkg
