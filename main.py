@@ -100,34 +100,32 @@ def create_tts_dir():
     if not os.path.exists(TTS_AUDIO_DIR):
         os.mkdir(TTS_AUDIO_DIR)
 
-# Creates anki notes from a sentence
+# Creates an anki note from a word (spacy token)
 # Adds the note to a heap so that the deck will (initially) be in priority order (more frequent words first)
-def create_anki_note(sentence, fdist, heap):
-    doc = [word for word in nlp(sentence) if word.text.isalpha()]
-
+def create_anki_note(word, fdist, heap):
     create_tts_dir()
 
-    for word in doc:
+    # for word in doc:
         # ensure that word won't have multiple notes
-        if fdist[word.text] > 1 or fdist[word.text] == 0 or check_if_note_exists(heap, word): # 0 if stopword or one letter (see main)
-            continue
+        # if fdist[word.text] > 1 or fdist[word.text] == 0 or check_if_note_exists(heap, word): # 0 if stopword or one letter (see main)
+            # continue
 
-        word_on_card = word.text
-        gender = get_word_token_gender(word)
+    word_on_card = word.text
+    gender = get_word_token_gender(word)
 
-        # Only want to show lemmatized version of the word if it's different to original version of the word
-        # Temp solution for this is to use an empty string
-        if word.text.casefold() == word.lemma_.casefold():
-            lemmatized_word = ''
-        else:
-            lemmatized_word = word.lemma_
-            word_on_card = word.lemma_
+    # Only want to show lemmatized version of the word if it's different to original version of the word
+    # Temp solution for this is to use an empty string
+    if word.text.casefold() == word.lemma_.casefold():
+        lemmatized_word = ''
+    else:
+        lemmatized_word = word.lemma_
+        word_on_card = word.lemma_
 
-        word_audio_path = create_word_audio(word.text) # Non-lemmatized version!
+    word_audio_path = create_word_audio(word.text) # Non-lemmatized version!
 
-        note = SortableNote(anki_note_model, [word.text, lemmatized_word, sentence, translate_word(word.lemma_), word.tag_, gender, f'[sound:{word_audio_path}]'], fdist[word.text], word_on_card) # NOTE: word on card may be different to word in fdist due to lemmatizing
-        note.priority *= -1 # Python has no max heap!
-        heapq.heappush(heap, note)
+    note = SortableNote(anki_note_model, [word.text, lemmatized_word, sentence, translate_word(word.lemma_), word.tag_, gender, f'[sound:{word_audio_path}]'], fdist[word.text], word_on_card) # NOTE: word on card may be different to word in fdist due to lemmatizing
+    note.priority *= -1 # Python has no max heap!
+    heapq.heappush(heap, note)
 
 def add_heap_to_deck(heap, deck):
     while len(heap) > 0:
@@ -181,7 +179,6 @@ def main_prog(filename):
         # spacy_doc = nlp(file)
         # spacy_words = {token.lemma_ for token in spacy_doc if token.is_stop == False and token.is_punct == False and token.text.startswith("-") == False}
         # print(spacy_words)
-        
         # ==== SPACY ====
         doc = nlp(file)
         sentences = [sent for sent in doc.sents]
@@ -192,7 +189,12 @@ def main_prog(filename):
                     processed_words.append(word)
 
         freq_dist = create_freq_dist(processed_words)
-        print(freq_dist, len(freq_dist))
+        for word in freq_dist: # Already filtered out duplicates
+            create_anki_note(word, freq_dist, heap)
+
+        # for word in processed_words:
+        #     if word in freq_dist:
+        #         create_anki_note(word, freq_dist, heap)
 
         # for sent in sentences:
         #     create_anki_note(sent, fdist, heap)
