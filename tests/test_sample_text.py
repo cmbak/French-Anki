@@ -30,7 +30,7 @@ def test_create_tts_dir():
 
 def test_create_word_audio():
     main.create_word_audio('traduction', [])
-    if sys.platofrm == 'win32':
+    if sys.platform == 'win32':
         path = french_anki_dir()+'\\PY_TTS_AUDIO\\traduction.mp3'
     elif sys.platform == 'darwin' or sys.platform == 'linux':
         path = french_anki_dir()+'/PY_TTS_AUDIO/traduction.mp3'
