@@ -29,6 +29,8 @@ stopwords = set(stopwords.words('french'))
 # spacy
 # py -m spacy download fr_core_news_sm (more eff than dep_news_trf)
 nlp = spacy.load('fr_core_news_sm')
+nlp.add_pipe('sentencizer')
+spacy_stopwords = nlp.Defaults.stop_words
 
 # SAMPLE TEXTS FROM LAWLESS FRENCH https://www.lawlessfrench.com
 
@@ -143,7 +145,7 @@ def create_deck_from_heap(heap):
     add_heap_to_deck(heap, deck)
     package = genanki.Package(deck)
     package.media_files = media_files
-    package.write_to_file('testpy.apkg')
+    package.write_to_file('spacy_testpy.apkg')
     print("Deck created successfully!")
 
 def main_prog(filename):
@@ -165,14 +167,28 @@ def main_prog(filename):
         # spacy_doc = nlp(file)
         # spacy_words = {token.lemma_ for token in spacy_doc if token.is_stop == False and token.is_punct == False and token.text.startswith("-") == False}
         # print(spacy_words)
-
-        for sent in sentences:
-            create_anki_note(sent, fdist, heap)
         
-        create_deck_from_heap(heap)
+        # ==== SPACY ====
+        doc = nlp(file)
+        sentences = [sent for sent in doc.sents]
+        processed_words = []
+        for sent in sentences:
+            for word in sent:
+                if not word.is_stop and word.is_alpha:
+                    processed_words.append(word)
 
-        if delete_audio_folder:
-            shutil.rmtree(TTS_AUDIO_DIR)
+        # tokenize the sentences
+            # these get spacyed in create-anki-note
+        # tokenize the words
+        # frequency distribution of the words
+
+        # for sent in sentences:
+        #     create_anki_note(sent, fdist, heap)
+        
+        # create_deck_from_heap(heap)
+
+        # if delete_audio_folder:
+        #     shutil.rmtree(TTS_AUDIO_DIR)
 
     except Exception as e:
         print('Sorry, something went wrong:', str(e))
