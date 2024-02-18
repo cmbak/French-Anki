@@ -109,7 +109,7 @@ def create_anki_note(sentence, fdist, heap):
             lemmatized_word = word.lemma_
             word_on_card = word.lemma_
 
-        word_audio_path = create_word_audio(word_on_card)
+        word_audio_path = create_word_audio(word.text) # Non-lemmatized version!
 
         note = SortableNote(anki_note_model, [word.text, lemmatized_word, sentence, translate_word(word.lemma_), word.tag_, gender, f'[sound:{word_audio_path}]'], fdist[word.text], word_on_card) # NOTE: word on card may be different to word in fdist due to lemmatizing
         note.priority *= -1 # Python has no max heap!
