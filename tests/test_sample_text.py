@@ -1,8 +1,7 @@
-import pytest
 import os
+import sys
 import main
 import spacy
-# import translators as ts
 
 def french_anki_dir():
     return os.path.dirname(os.path.dirname(__file__))
@@ -16,30 +15,26 @@ def nlp_sentence():
     nlp.add_pipe('sentencizer')
     return [sent for sent in nlp("L’art de la traduction").sents]
 
-# def process
-
-# @pytest.fixture()
-# def translator():
-#     return 
-
-# def spacy_sent():
-#     nlp = spacy.load('fr_core_news_sm')
-#     nlp.add_pipe('sentencizer')
-#     spacy_stopwords = nlp.Defaults.stop_words
-
-# Call spacy on first sentence?
+# ======== Tests ========
 
 def test_translate_word():
     assert main.translate_word('traduction') == 'translation'
 
 def test_create_tts_dir():
     main.create_tts_dir()
-    tts_dir = french_anki_dir()+'\\PY_TTS_AUDIO'
+    if sys.platform == 'win32':
+        tts_dir = french_anki_dir()+'\\PY_TTS_AUDIO'
+    elif sys.platform == 'darwin' or sys.platform == 'linux':
+        tts_dir = french_anki_dir()+'/PY_TTS_AUDIO'
     assert os.path.exists(tts_dir) == True
 
 def test_create_word_audio():
     main.create_word_audio('traduction', [])
-    assert os.path.exists(french_anki_dir()+'\\PY_TTS_AUDIO\\traduction.mp3')
+    if sys.platofrm == 'win32':
+        path = french_anki_dir()+'\\PY_TTS_AUDIO\\traduction.mp3'
+    elif sys.platform == 'darwin' or sys.platform == 'linux':
+        path = french_anki_dir()+'/PY_TTS_AUDIO/traduction.mp3'
+    assert os.path.exists(path)
 
 def test_get_word_token_gender():
     doc = nlp_word('traduction')
