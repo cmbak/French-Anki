@@ -17,6 +17,7 @@ French Gen Python (name is a wip!) is a Python program which allows you to turn 
 - [Python](https://www.python.org/downloads/) (>=3.9)
 - [pip](https://pip.pypa.io/en/stable/installation/)
 - [Anki](https://apps.ankiweb.net/)
+- [Git](https://git-scm.com/downloads)
 
 ## Installation
 
