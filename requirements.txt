@@ -3,7 +3,7 @@ beautifulsoup4==4.12.3
 blis==0.7.11
 cached-property==1.5.2
 catalogue==2.0.10
-certifi==2023.11.17
+certifi==2024.7.4
 cffi==1.16.0
 charset-normalizer==3.3.2
 chevron==0.14.0
@@ -42,7 +42,7 @@ pytest==8.0.1
 PyYAML==6.0.1
 regex==2023.12.25
 requests==2.31.0
-setuptools==69.0.3
+setuptools==70.0.0
 six==1.16.0
 smart-open==6.4.0
 soupsieve==2.5
